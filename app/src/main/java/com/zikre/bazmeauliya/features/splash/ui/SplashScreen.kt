@@ -1,11 +1,14 @@
-package com.zikre.bazmeauliya.features.screens
+package com.zikre.bazmeauliya.features.splash.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -14,18 +17,23 @@ import androidx.compose.ui.platform.LocalContext
 import com.zikre.bazmeauliya.utils.DataStoreUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 @Composable
 fun SplashScreen(onDashboard: () -> Unit, onLogin: () -> Unit) {
 
     val context = LocalContext.current
     val dataStoreUtil = remember { DataStoreUtil(context) } // ✅ Remembered instance
+    var hasNavigated by remember { mutableStateOf(false) }
 
-
-    LaunchedEffect(Unit) { // ✅ Ensures effect runs only once
-        dataStoreUtil.isLoggedIn().collectLatest {
-            delay(1000) // Simulating splash delay
-            if (it) onDashboard() else onLogin()
+    LaunchedEffect(Unit) {
+        dataStoreUtil.isLoggedIn().collectLatest { isLoggedIn ->
+            delay(1000)
+            if (!hasNavigated) {
+                hasNavigated = true
+                if (isLoggedIn) onDashboard() else onLogin()
+            }
         }
     }
 
@@ -43,29 +51,11 @@ fun SplashScreen(onDashboard: () -> Unit, onLogin: () -> Unit) {
                 )
             )
     ) {
-       /* Image(
-            painter = painterResource(
-                id =
-                R.drawable.img_splash_top_circle
-            ),
-            contentDescription = "Top End Circle",
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 100.dp)
-        )*/
-
-       /* Image(
-            painter = painterResource(id = R.drawable.ic_vms_splash),
-            contentDescription = "ManLaptop",
+        Text(
+            text = "Welcome to Project",
             modifier = Modifier
                 .align(Alignment.Center)
         )
-        Image(
-            painter = painterResource(id = R.drawable.img_splash_bottom_circle),
-            contentDescription = "Circle",
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-        )*/
     }
 }
 

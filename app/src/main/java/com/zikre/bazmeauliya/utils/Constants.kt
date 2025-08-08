@@ -11,5 +11,8 @@ object Constants {
 
     const val ANIMATION_TIME = 1000L
 
+    const val TEXT = "TEXT"
+    const val NUMBER = "NUMBER"
+    const val EMAIL = "EMAIL"
 
 }

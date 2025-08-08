@@ -1,97 +1,56 @@
 package com.zikre.bazmeauliya.navigation
 
-//import androidx.hilt.navigation.compose.hiltViewModel
-//import androidx.navigation.compose.composable
-
 import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.zikre.bazmeauliya.features.screens.SplashScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.zikre.bazmeauliya.features.login.ui.LoginScreen
+import com.zikre.bazmeauliya.features.splash.ui.SplashScreen
 import com.zikre.bazmeauliya.utils.DataStoreUtil
 import com.zikre.bazmeauliya.utils.LogoutManager
 
-@OptIn(ExperimentalAnimationApi::class)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun StartNavigation(context: Activity) {
 
-//    val navController = rememberNavController()
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
+    val context = LocalContext.current
+
+    var hasNavigated by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         LogoutManager.logoutTrigger.collect {
-            DataStoreUtil(context).saveLoggedIn(false)
-            navController.navigate(NavigationScreen.Login.route) {
-                popUpTo(0) { inclusive = true } // Clears all destinations from the back stack
-                launchSingleTop = true
+            if (!hasNavigated) {
+                hasNavigated = true
+                DataStoreUtil(context).saveLoggedIn(false)
+                navController.navigate(NavigationScreen.Login.route) {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         }
     }
 
-//    NavHost(navController = navController, startDestination = NavigationScreen.Splash.route) {
-    AnimatedNavHost(
-        navController = navController, startDestination = NavigationScreen.Splash.route,
-    ) {
-        composable(NavigationScreen.Splash.route,
-            enterTransition = {
-                when (initialState.destination.route) {
-                    NavigationScreen.Splash.route ->
-                        slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Left,
-                            animationSpec = tween(700)
-                        )
 
-                    else -> null
-                }
-            },
-            exitTransition = {
-                when (targetState.destination.route) {
-                    NavigationScreen.Splash.route ->
-                        slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Left,
-                            animationSpec = tween(700)
-                        )
-
-                    else -> null
-                }
-            },
-            popEnterTransition = {
-                when (initialState.destination.route) {
-                    NavigationScreen.Splash.route ->
-                        slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Right,
-                            animationSpec = tween(700)
-                        )
-                    else -> null
-                }
-            },
-            popExitTransition = {
-                when (targetState.destination.route) {
-                    NavigationScreen.Splash.route ->
-                        slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Right,
-                            animationSpec = tween(700)
-                        )
-
-                    else -> null
-                }
-            }
-
-        ) {
+    NavHost(navController = navController, startDestination = NavigationScreen.Splash.route) {
+        composable(NavigationScreen.Splash.route) {
             SplashScreen(
                 onDashboard = {
                     navController.navigate(NavigationScreen.Dashboard.route) {
                         popUpTo(NavigationScreen.Splash.route) {
                             inclusive = true
                         }
-//                        launchSingleTop = true
                     }
                 },
                 onLogin = {
@@ -104,27 +63,8 @@ fun StartNavigation(context: Activity) {
             )
         }
 
-     /*   composable(NavigationScreen.Login.route) {
-            LoginScreen(
-                viewModel = hiltViewModel(),
-                onOTPScreen = {
-                    navController.navigate(NavigationScreen.OTP.route)
-                }
-            )
+        composable(NavigationScreen.Login.route) {
+            LoginScreen(viewModel = hiltViewModel(), onOTPScreen = {})
         }
-
-        composable(NavigationScreen.OTP.route) {
-            OTPScreen(
-                viewModel = hiltViewModel(),
-                onDashboardScreen = {
-                    navController.navigate(NavigationScreen.Dashboard.route) {
-                        popUpTo(NavigationScreen.Dashboard.route) {
-                            inclusive = true
-                        }
-                    }
-                }
-            )
-        }*/
-
     }
 }

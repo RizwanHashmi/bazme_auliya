@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.zikre.bazmeauliya"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.zikre.bazmeauliya"
@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.navigation.animation)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

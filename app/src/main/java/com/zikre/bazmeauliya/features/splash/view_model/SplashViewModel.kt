@@ -1,4 +1,4 @@
-package com.zikre.bazmeauliya.features.view_model
+package com.zikre.bazmeauliya.features.splash.view_model
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
