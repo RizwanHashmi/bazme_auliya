@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.toUpperCase
@@ -37,137 +38,113 @@ import com.zikre.bazmeauliya.utils.Constants.EMAIL
 import com.zikre.bazmeauliya.utils.Constants.NUMBER
 import com.zikre.bazmeauliya.utils.Constants.TEXT
 import kotlinx.coroutines.launch
-
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun InputTextField(
-//    focusRequester: FocusRequester = FocusRequester.Cancel,
     textValue: MutableState<String>,
     errorField: MutableState<Boolean>,
     label: String,
     leadingIcon: Int,
     textField: String = TEXT,
-//    isSingleLine: Boolean = false,
-    textColor: Color = Color(0xFF969696),
-    borderColor: Color = Color(0xFFF36773),
-    isEnable : Boolean =  true,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    borderColor: Color = MaterialTheme.colorScheme.primary,
+    isEnable: Boolean = true,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val pattern = remember { Regex("[a-zA-z\\s]*") }
-    val numberPattern = remember { Regex("^\\d*\\.?\\d*\$") }  // Pattern to allow digits and an optional decimal point
+    val pattern = remember { Regex("[a-zA-Z\\s]*") }
+    val numberPattern = remember { Regex("^\\d*\\.?\\d*\$") }
 
     val focusRequester = remember { FocusRequester() }
-
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
 
-    val tfBorderColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = borderColor,
-        unfocusedBorderColor = borderColor,
-        focusedLabelColor = Color(0xFF969696),
-        cursorColor = Color(0xFF969696),
-        unfocusedTextColor = if (isSystemInDarkTheme())Color(0xFF969696)else Color(0xFF333333),
-        disabledBorderColor = borderColor,
-        disabledTextColor = if (isSystemInDarkTheme())Color(0xFF969696)else Color(0xFF333333)
-    )
-
     var isFocus by remember { mutableStateOf(false) }
 
-    val leadingIconView = @Composable {
-        Image(painter = painterResource(id = leadingIcon), contentDescription = "")
-    }
-    val trailingIconView = @Composable {
-        Image(painter = painterResource(id = leadingIcon), contentDescription = "")
-    }
+    val tfColors = TextFieldDefaults.outlinedTextFieldColors(
+        focusedBorderColor = borderColor,
+        unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+        errorBorderColor = MaterialTheme.colorScheme.error,
+        focusedLabelColor = borderColor,
+        cursorColor = borderColor,
+        focusedTextColor = textColor,
+        disabledTextColor = MaterialTheme.colorScheme.secondary,
+        disabledBorderColor = MaterialTheme.colorScheme.secondary
+    )
 
     OutlinedTextField(
-        value = textValue.value.uppercase(),
+        value = textValue.value,
         onValueChange = {
-            when (textField) {
-                TEXT -> {
-                    if (it.matches(pattern)) {
-                        textValue.value = it
-                        errorField.value = false
-                    }
-                }
-                NUMBER -> {
-                    if (it.matches(numberPattern)) {  // Validate against the number pattern
-                        textValue.value = it
-                        errorField.value = false
-                    }
-                }
-                else -> {
-                    textValue.value = it
-                    errorField.value = false
-                }
+            val isValid = when (textField) {
+                TEXT -> it.matches(pattern)
+                NUMBER -> it.matches(numberPattern)
+                else -> true
             }
 
+            if (isValid) {
+                textValue.value = it
+                errorField.value = false
+            } else {
+                errorField.value = true
+            }
         },
-        shape = RoundedCornerShape(10.dp),
-        colors = tfBorderColors,
+        shape = RoundedCornerShape(16.dp),
+        colors = tfColors,
         modifier = Modifier
             .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
+            .padding(horizontal = 24.dp, vertical = 12.dp)
             .focusRequester(focusRequester)
-            .padding(
-                top = 20.dp,
-                start = 20.dp,
-                end = 20.dp
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .onFocusChanged { isFocus = it.isFocused },
+        label = {
+            Text(
+                text = label,
+                fontSize = if (isFocus || textValue.value.isNotBlank()) 12.sp else 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (errorField.value) MaterialTheme.colorScheme.error else textColor
             )
-            .onFocusChanged {
-                isFocus = it.isFocused
-            },
+        },
+        leadingIcon = if (leadingIcon != 0) {
+            {
+                Icon(
+                    painter = painterResource(id = leadingIcon),
+                    contentDescription = null,
+                    tint = if (errorField.value) MaterialTheme.colorScheme.error else borderColor
+                )
+            }
+        } else null,
+        trailingIcon = {
+            if (isEnable) {
+                TrailingButton(fieldName = textValue, fieldError = errorField)
+            }
+        },
+        isError = errorField.value,
+        enabled = isEnable,
         keyboardOptions = KeyboardOptions(
             keyboardType = when (textField) {
                 NUMBER -> KeyboardType.Number
                 EMAIL -> KeyboardType.Email
-                else -> {
-                    KeyboardType.Text
-                }
+                else -> KeyboardType.Text
             },
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
             onDone = { keyboardController?.hide() }
         ),
-        label = {
-            Text(
-                text = label,
-                style = TextStyle(
-                    fontFamily = FontFamily(
-                        Font(
-                            resId = R.font.poppins_semibold
-                        )
-                    ),
-                    fontSize = if (textValue.value.isNotBlank() || isFocus) 10.sp else 14.sp,
-                    color = if (isSystemInDarkTheme()) Color(0xFFFFFFFF) else textColor,
-                ),
-            )
-        },
-        maxLines = 2,
-        leadingIcon = if (leadingIcon != 0) leadingIconView else null,
-        trailingIcon = {
-            if (isEnable){
-                TrailingButton(
-                    fieldName = textValue,
-                    fieldError = errorField
-                )
-            }else{
-                null
-            }
-        },
-        isError = errorField.value,
-        enabled = isEnable,
+        maxLines = 1,
+        singleLine = true
     )
 
     if (errorField.value) {
         coroutineScope.launch {
             bringIntoViewRequester.bringIntoView()
         }
-        ShowErrorView("Please Enter $label")
+        ShowErrorView("Please enter a valid $label")
     }
-
 }
 
 

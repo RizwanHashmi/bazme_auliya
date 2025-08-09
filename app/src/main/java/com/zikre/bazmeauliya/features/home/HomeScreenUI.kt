@@ -1,4 +1,4 @@
-package com.zikre.bazmeauliya.features.login.ui
+package com.zikre.bazmeauliya.features.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import com.zikre.bazmeauliya.utils.Constants.NUMBER
 import com.zikre.bazmeauliya.utils.Constants.TEXT
 
 @Composable
-fun LoginScreenUI(
+fun HomeScreenUI(
     uiState: LoginUIState,
     onSubmitClick: () -> Unit
 ) {
@@ -50,73 +50,20 @@ fun LoginScreenUI(
         ) {
             // Title
             Text(
-                text = "Zikr Registration",
+                text = "Successfully Registered",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Subtitle
-            Text(
-                text = "Begin your spiritual journey with remembrance",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.secondary
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Name Field
-            InputTextField(
-                textValue = uiState.name,
-                errorField = uiState.nameError,
-                label = "Name*",
-                leadingIcon = 0,
-                textField = TEXT
-            )
-
-            // Mobile Field
-            InputTextField(
-                textValue = uiState.mobileNo,
-                errorField = uiState.mobileError,
-                label = "Mobile Number*",
-                leadingIcon = 0,
-                textField = NUMBER
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Submit Button
-            Button(
-                onClick = onSubmitClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text(
-                    text = "Submit",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun HomeScreenPreview() {
 
     val mockName = remember { mutableStateOf("Rizwan") }
     val mockError = remember { mutableStateOf(false) }
@@ -131,7 +78,7 @@ fun LoginScreenPreview() {
         mobileError = mockMobileNoError
     )
 
-    LoginScreenUI(
+    HomeScreenUI(
         uiState = uiState,
         onSubmitClick = {}
     )

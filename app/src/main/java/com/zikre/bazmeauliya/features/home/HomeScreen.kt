@@ -1,4 +1,4 @@
-package com.zikre.bazmeauliya.features.login.ui
+package com.zikre.bazmeauliya.features.home
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
@@ -13,7 +13,7 @@ import com.zikre.bazmeauliya.network_utils.ConnectionState
 import com.zikre.bazmeauliya.utils.NetworkResultUpdated
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel, onHomeScreen: () -> Unit) {
+fun HomeScreen(viewModel: LoginViewModel, onHomeScreen: () -> Unit) {
     val context = LocalContext.current
 
     val connection by connectivityState()
@@ -27,33 +27,8 @@ fun LoginScreen(viewModel: LoginViewModel, onHomeScreen: () -> Unit) {
         mobileNo = viewModel.mobileNo,
         mobileError = viewModel.mobileNoError
     )
-/*
-    LaunchedEffect(loginState) {
-        when (loginState) {
-            is NetworkResultUpdated.Success -> {
-                val data = (loginState as NetworkResultUpdated.Success).data
-                if (data.status == 1) {
-                    viewModel.setMobileNumber()
-                    onOTPScreen()
-                } else {
-                    Toast.makeText(context, data.msg, Toast.LENGTH_LONG).show()
 
-                }
-            }
-
-            is NetworkResultUpdated.Failed -> {
-                   Toast.makeText(
-                       context,
-                       (loginState as NetworkResultUpdated.Failed).message,
-                       Toast.LENGTH_LONG
-                   ).show()
-            }
-
-            else -> Unit
-        }
-    }*/
-
-    LoginScreenUI(
+    HomeScreenUI(
         uiState = uiState,
         onSubmitClick = {
             viewModel.registerLocally {

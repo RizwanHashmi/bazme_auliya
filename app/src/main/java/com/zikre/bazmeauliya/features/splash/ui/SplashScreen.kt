@@ -21,7 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 @Composable
-fun SplashScreen(onDashboard: () -> Unit, onLogin: () -> Unit) {
+fun SplashScreen(onHomeScreen: () -> Unit, onLogin: () -> Unit) {
 
     val context = LocalContext.current
     val dataStoreUtil = remember { DataStoreUtil(context) } // ✅ Remembered instance
@@ -32,7 +32,7 @@ fun SplashScreen(onDashboard: () -> Unit, onLogin: () -> Unit) {
             delay(1000)
             if (!hasNavigated) {
                 hasNavigated = true
-                if (isLoggedIn) onDashboard() else onLogin()
+                if (isLoggedIn) onHomeScreen() else onLogin()
             }
         }
     }

@@ -42,6 +42,24 @@ class LoginViewModel @Inject constructor(private val repository: LoginRepository
         }
     }
 
+    fun registerLocally(onSuccess: () -> Unit) {
+        val nameInput = name.value.trim()
+        val mobileInput = mobileNo.value.trim()
+
+        // Basic validation
+        nameError.value = nameInput.isEmpty()
+        mobileNoError.value = mobileInput.length != 10
+
+        if (nameError.value || mobileNoError.value) return
+
+        viewModelScope.launch {
+            dataStoreUtil.setUserName(nameInput)
+            dataStoreUtil.saveMobileNo(mobileInput)
+            dataStoreUtil.saveLoggedIn(true)
+            onSuccess()
+        }
+    }
+
     fun setMobileNumber() {
             viewModelScope.launch {
                 dataStoreUtil.saveMobileNo(mobileNumber.value)

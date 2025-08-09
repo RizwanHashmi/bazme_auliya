@@ -19,8 +19,8 @@ class DataStoreUtil @Inject constructor(@ApplicationContext private val context:
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
         val THEME_KEY = booleanPreferencesKey("theme")
         val MOBILE_NO = stringPreferencesKey("mobile_no")
-        val USER_ID = stringPreferencesKey("user_id")
         val USER_NAME = stringPreferencesKey("user_name")
+        val USER_ID = stringPreferencesKey("user_id")
         val IS_LOGGED_IN = booleanPreferencesKey("isLoggedIn")
         val JWT = stringPreferencesKey("JWT_Token")
     }

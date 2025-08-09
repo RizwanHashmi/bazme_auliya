@@ -14,15 +14,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zikre.bazmeauliya.features.home.HomeScreen
 import com.zikre.bazmeauliya.features.login.ui.LoginScreen
 import com.zikre.bazmeauliya.features.splash.ui.SplashScreen
+import com.zikre.bazmeauliya.features.zikr.TasbihCounterScreen
 import com.zikre.bazmeauliya.utils.DataStoreUtil
 import com.zikre.bazmeauliya.utils.LogoutManager
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun StartNavigation(context: Activity) {
+fun StartNavigation(activity: Activity) {
 
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -42,12 +43,11 @@ fun StartNavigation(context: Activity) {
         }
     }
 
-
     NavHost(navController = navController, startDestination = NavigationScreen.Splash.route) {
         composable(NavigationScreen.Splash.route) {
             SplashScreen(
-                onDashboard = {
-                    navController.navigate(NavigationScreen.Dashboard.route) {
+                onHomeScreen = {
+                    navController.navigate(NavigationScreen.Home.route) {
                         popUpTo(NavigationScreen.Splash.route) {
                             inclusive = true
                         }
@@ -64,7 +64,21 @@ fun StartNavigation(context: Activity) {
         }
 
         composable(NavigationScreen.Login.route) {
-            LoginScreen(viewModel = hiltViewModel(), onOTPScreen = {})
+            LoginScreen(viewModel = hiltViewModel(), onHomeScreen = {
+                navController.navigate(NavigationScreen.Home.route) {
+                    popUpTo(NavigationScreen.Login.route) {
+                        inclusive = true  // Remove Login from back stack
+                    }
+                    launchSingleTop = true  // Avoid multiple instances
+                }
+            })
+        }
+
+        /*composable(NavigationScreen.Home.route) {
+            HomeScreen(viewModel = hiltViewModel(), onHomeScreen = {})
+        }*/
+        composable(NavigationScreen.Home.route) {
+            TasbihCounterScreen(viewModel = hiltViewModel(), onHomeScreen = {})
         }
     }
 }
