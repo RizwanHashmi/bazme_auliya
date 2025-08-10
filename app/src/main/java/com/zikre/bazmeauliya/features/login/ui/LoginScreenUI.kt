@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,7 +47,8 @@ fun LoginScreenUI(
             modifier = Modifier
                 .align(Alignment.Center)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .imePadding(), // 👈 This pushes content above the keyboard
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Title
@@ -94,7 +97,7 @@ fun LoginScreenUI(
             Button(
                 onClick = onSubmitClick,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(200.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),

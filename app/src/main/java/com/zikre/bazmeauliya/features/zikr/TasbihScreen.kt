@@ -27,9 +27,8 @@ fun TasbihCounterScreen(viewModel: LoginViewModel, onHomeScreen: () -> Unit) {
     )
 
     TasbihCounterUI(
-        count = 0,
-        onTasbihClick = {},
-        onResetClick = {},
+        title = "New Title",
+        onBackClick = {}
     )
 }
 

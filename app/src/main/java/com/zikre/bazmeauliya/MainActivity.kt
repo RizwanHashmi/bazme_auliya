@@ -13,11 +13,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 //import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,71 +63,76 @@ class MainActivity : ComponentActivity(), InstallStateUpdatedListener {
     private var currentType = AppUpdateType.FLEXIBLE
     private lateinit var isShowSnackbar: MutableState<Boolean>
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
         appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-            // Check if update is available
-            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) { // UPDATE IS AVAILABLE
+            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
                 val update_priority = info.updatePriority()
                 Log.e("inAppUpdate", "Update Available $update_priority")
                 startUpdate(info, AppUpdateType.FLEXIBLE)
             } else {
                 Log.e("inAppUpdate", "Update NOT Available")
-                // UPDATE IS NOT AVAILABLE
             }
         }
         appUpdateManager.registerListener(this)
+
         setContent {
+            // Force fontScale = 1 (you already did this)
             CompositionLocalProvider(
                 LocalDensity provides Density(
                     density = LocalDensity.current.density,
-                    fontScale = 1f // Forces font size to remain fixed regardless of device settings
+                    fontScale = 1f
                 )
             ) {
                 val snackbarHostState = remember { SnackbarHostState() }
-                isShowSnackbar = remember { mutableStateOf(false) }
-                val scope = rememberCoroutineScope()
-                BATheme() {
+
+                // state to toggle showing the snackbar (set true when update downloaded)
+                val isShowSnackbar = remember { mutableStateOf(false) }
+
+                // Use BATheme
+                BATheme {
+                    // Scaffold with status bar padding
                     Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding(), // prevents overlap with status bar
                         contentColor = contentColorFor(MaterialTheme.colorScheme.background),
-                        snackbarHost = { SnackbarHost(snackbarHostState) }
-                    ) {
-                        if (isShowSnackbar.value) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 20.dp),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                scope.launch {
-                                    val snackbarResult = snackbarHostState.showSnackbar(
-                                        message = "An update has just been downloaded.",
-                                        actionLabel = "RESTART"
-                                    )
-
-                                    when (snackbarResult) {
-                                        SnackbarResult.Dismissed -> {
-                                            Log.d(TAG, "Dismissed")
-                                        }
-
-                                        SnackbarResult.ActionPerformed -> {
-                                            appUpdateManager.completeUpdate()
-                                            Log.d(
-                                                "SnackbarDemo",
-                                                "Snackbar's button clicked"
-                                            )
-                                        }
+                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                    ) { innerPadding ->
+                        // When isShowSnackbar becomes true, show snackbar from a side-effect
+                        // and react to its result
+                        LaunchedEffect(isShowSnackbar.value) {
+                            if (isShowSnackbar.value) {
+                                val snackbarResult = snackbarHostState.showSnackbar(
+                                    message = "An update has just been downloaded.",
+                                    actionLabel = "RESTART"
+                                )
+                                when (snackbarResult) {
+                                    SnackbarResult.Dismissed -> {
+                                        Log.d(TAG, "Snackbar dismissed")
+                                    }
+                                    SnackbarResult.ActionPerformed -> {
+                                        appUpdateManager.completeUpdate()
+                                        Log.d(TAG, "User requested restart (in-app update).")
                                     }
                                 }
+                                // reset the flag so it won't show again
+                                isShowSnackbar.value = false
                             }
                         }
-                        StartNavigation(this)
+
+                        // Main content: apply scaffold's inner padding so nothing overlaps system bars / nav bars
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            // Your navigation / main UI root
+                            // Keep the same call you used before; adjust if StartNavigation signature differs
+                            StartNavigation(this@MainActivity)
+                        }
                     }
                 }
             }
